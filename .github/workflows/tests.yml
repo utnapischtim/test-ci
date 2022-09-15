@@ -34,7 +34,7 @@ jobs:
         python-version: "${{fromJson(needs.create-strategy.outputs.python-versions)}}"
         requirements-level: [pypi]
         db-service: "${{fromJson(needs.create-strategy.outputs.db-services)}}"
-        search-service: "${{fromJson(needs.create-strategy.outputs.search-services)}}"
+        # search-service: "${{fromJson(needs.create-strategy.outputs.search-services)}}"
 
     steps:
       - name: Checkout
