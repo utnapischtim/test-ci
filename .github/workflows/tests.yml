@@ -14,8 +14,8 @@ jobs:
         run: echo "::set-output name=pythonVersions::$(echo ['3.6', '3.7', '3.8', '3.9', '3.10'])"
     outputs:
       python-versions: "${{steps.python-versions.outputs.pythonVersions}}"
-      db-services: "[postgresql13]"
-      search-services: "[elasticsearch7]"
+      db-services: "['postgresql13']"
+      search-services: "['elasticsearch7']"
 
   tests:
     needs: create-strategy
