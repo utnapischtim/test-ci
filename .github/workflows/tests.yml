@@ -14,8 +14,8 @@ jobs:
         run: echo "::set-output name=pythonVersions::$(echo ['3.6', '3.7', '3.8', '3.9', '3.10'])"
     outputs:
       python-versions: "${{steps.python-versions.outputs.pythonVersions}}"
-      db-services: []
-      search-services: []
+      db-services: "[]"
+      search-services: "[]"
 
   tests:
     needs: create-strategy
@@ -25,10 +25,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: "${{needs.create-strategy.outputs.python-versions}}"
+        python-version: "${{fromJson(needs.create-strategy.outputs.python-versions)}}"
         requirements-level: [pypi]
-        db-service: "${{needs.create-strategy.outputs.db-services}}"
-        search-service: "${{needs.create-strategy.outputs.search-services}}"
+        db-service: "${{fromJson(needs.create-strategy.outputs.db-services)}}"
+        search-service: "${{fromJson(needs.create-strategy.outputs.search-services)}}"
 
     steps:
       - name: Checkout
