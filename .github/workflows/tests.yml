@@ -14,4 +14,4 @@ jobs:
       matrix:
         python-version: "${{fromJson(needs.create-strategy.outputs.python-versions)}}"
         requirements-level: [pypi]
-    uses: utnapischtim/test-ci/.github/workflows/steps.yml@main2
+    uses: utnapischtim/test-ci/.github/workflows/steps.yml@main
