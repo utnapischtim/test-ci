@@ -11,7 +11,7 @@ jobs:
 
       - name: python-versions
         id: python-versions
-        run: echo "::set-output name=pythonVersions::$(echo ['3.7', '3.8', '3.9', '3.10'])"
+        run: echo "::set-output name=pythonVersions::$(echo [\"3.7\", \"3.8\", \"3.9\", \"3.10\"])"
     outputs:
       python-versions: "${{steps.python-versions.outputs.pythonVersions}}"
       db-services: "['postgresql13']"
@@ -34,7 +34,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Set up Python ${{ matrix.python-version }}
+      - name: Set up Python "${{ matrix.python-version }}"
         uses: actions/setup-python@v2
         with:
           python-version: "${{ matrix.python-version }}"
