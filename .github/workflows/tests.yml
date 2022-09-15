@@ -11,9 +11,9 @@ jobs:
 
       - name: python-versions
         id: python-versions
-        run: echo "::set-output name=python-versions::$(grep 'Programming Language :: Python ::' setup.cfg | sed -E 's/^.*::\s(.*)$/\1/' | tr '\n' ' ')"
+        run: echo "::set-output name=pythonVersions::$(echo 'aa')"
     outputs:
-      python-versions: "${{steps.python-versions.outputs.python-versions}}"
+      python-versions: "${{steps.python-versions.outputs.pythonVersions}}"
       db-services: "[]"
       search-services: "[]"
 
