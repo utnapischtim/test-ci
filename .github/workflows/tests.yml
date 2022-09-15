@@ -3,17 +3,15 @@ on:
 
 jobs:
   create-strategy:
-    uses: ./.github/workflows/strategy.yml
+    uses: utnapischtim/test-ci/.github/workflows/strategy.yml@main
 
   tests:
     needs: create-strategy
     runs-on: ubuntu-latest
     name: Test (Python ${{matrix.python-versions}}
-
     strategy:
       fail-fast: false
       matrix:
         python-version: "${{fromJson(needs.create-strategy.outputs.python-versions)}}"
         requirements-level: [pypi]
-
-    uses: ./.github/workflows/steps.yml
+    uses: utnapischtim/test-ci/.github/workflows/steps.yml@main2
