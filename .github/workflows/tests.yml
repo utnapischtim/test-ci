@@ -19,9 +19,10 @@ jobs:
           DB=$(if grep -q "invenio-db" setup.cfg; then echo 'YES'; else echo 'NO'; fi)
           SEARCH=$(if grep -q "invenio-search" setup.cfg; then echo 'YES'; else echo 'NO'; fi)
 
-          matrix=$((
+          matrix=$(
             echo '{ "python-version": $PYTHON_VERSIONS, "requirements-level": ["pypi"] }'
-          ) | jq -c .)
+          )
+          echo $matrix
           echo "::set-output name=matrix::$matrix"
 
   tests:
