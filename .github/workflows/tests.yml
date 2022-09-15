@@ -3,7 +3,24 @@ on:
 
 jobs:
   create-strategy:
-    uses: utnapischtim/test-ci/.github/workflows/strategy.yml@main
+    outputs:
+      matrix: ${{ steps.requirements.outputs.matrix }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: requirements
+        id: requirements
+        run: |
+          PYTHON_VERSIONS=$(grep "Programming Language :: Python ::" setup.cfg | sed -E "s/^.*::\s(.*)$/\1/" | tr "\n" " " | xargs | sed -E -e 's/\s/","/g' -e 's/^/["/' -e 's/$/"]/')
+          DB=$(if grep -q "invenio-db" setup.cfg; then echo 'YES'; else echo 'NO'; fi)
+          SEARCH=$(if grep -q "invenio-search" setup.cfg; then echo 'YES'; else echo 'NO'; fi)
+
+          matrix=$((
+            echo '{ "python-version": $PYTHON_VERSIONS, "requirements-level": ["pypi"] }'
+          ) | jq -c .)
+          echo "::set-output name=matrix::$matrix"
 
   tests:
     needs: create-strategy
@@ -11,10 +28,48 @@ jobs:
     name: Test (Python ${{matrix.python-version}}
     strategy:
       fail-fast: false
-      matrix:
-        python-version: "${{fromJson(needs.create-strategy.outputs.python-versions)}}"
-        requirements-level: [pypi]
-    #uses: utnapischtim/test-ci/.github/workflows/steps.yml@main
+      matrix: ${{ fromJson(needs.create-strategy.outputs.matrix) }}
+
     steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Set up Python "${{ matrix.python-version }}"
+        uses: actions/setup-python@v2
+        with:
+          python-version: "${{ matrix.python-version }}"
+
       - name: Generate dependencies
-        run: echo ${{matrix.python-version}}
+        run: |
+          pip install wheel requirements-builder
+          requirements-builder -e "tests" --level=${{ matrix.requirements-level }} setup.py > .${{ matrix.requirements-level }}-${{ matrix.python-version }}-requirements.txt
+          cat .${{ matrix.requirements-level }}-${{ matrix.python-version }}-requirements.txt
+
+      - name: Cache pip
+        uses: actions/cache@v2
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('.${{ matrix.requirements-level }}-${{ matrix.python-version }}-requirements.txt') }}
+
+      - name: Log pip before install
+        run: |
+          pip --version
+          pip list
+
+      - name: Install dependencies
+        run: |
+          pip install -r .${{ matrix.requirements-level }}-${{ matrix.python-version }}-requirements.txt
+          pip install ".[tests]"
+          pip freeze
+          docker --version
+          docker-compose --version
+
+      - name: Log pip after install
+        run: |
+          pip --version
+          pip list
+
+      - name: Run tests
+        run: |
+          ./run-tests.sh
+
