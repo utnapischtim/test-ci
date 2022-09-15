@@ -1,0 +1,37 @@
+on:
+  workflow_call:
+    outputs:
+      python-versions:
+        description: "Python Versions"
+        value: ${{ jobs.create-strategy.outputs.python-versions }}
+      is-db:
+        description: "Database Tests necessary"
+        value: ${{ jobs.create-strategy.outputs.is-db }}
+      is-search:
+        description: "Search Tests necessary"
+        value: ${{ jobs.create-strategy.outputs.is-search }}
+
+jobs:
+  create-strategy:
+    runs-on: ubuntu-latest
+    name: "create strategy"
+
+    outputs:
+      python-versions: "${{steps.requirements.outputs.pythonVersions}}"
+      is-db: "${{steps.requirements.outputs.db}}"
+      is-search: "${{steps.requirements.outputs.search}}"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: requirements
+        id: requirements
+        run: |
+          PYTHON_VERSIONS=$(grep "Programming Language :: Python ::" setup.cfg | sed -E "s/^.*::\s(.*)$/\1/" | tr "\n" " " | xargs | sed -E -e 's/\s/","/g' -e 's/^/["/' -e 's/$/"]/')
+          DB=$(if grep -q "invenio-db" setup.cfg; then echo 'YES'; else echo 'NO'; fi)
+          SEARCH=$(if grep -q "invenio-search" setup.cfg; then echo 'YES'; else echo 'NO'; fi)
+          echo "::set-output name=pythonVersions::$PYTHON_VERSIONS"
+          echo "::set-output name=db::$DB"
+          echo "::set-output name=search::$SEARCH"
+
