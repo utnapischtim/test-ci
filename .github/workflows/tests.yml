@@ -13,8 +13,8 @@ jobs:
         id: requirements
         run: |
           PYTHON_VERSIONS=$(grep "Programming Language :: Python ::" setup.cfg | sed -E "s/^.*::\s(.*)$/\1/" | tr "\n" " " | xargs | sed -E -e 's/\s/","/g' -e 's/^/["/' -e 's/$/"]/')
-          DB=$(if grep -q "invenio-db" setup.cfg; then echo '["postgresql13", "mysql8"]'; else echo '[]'; fi)
-          SEARCH=$(if grep -q "invenio-search" setup.cfg; then echo '["elasticsearch7"]'; else echo '[]'; fi)
+          DB=$(if grep -q "invenio-db" setup.cfg; then echo 'YES'; else echo 'NO'; fi)
+          SEARCH=$(if grep -q "invenio-search" setup.cfg; then echo 'YES'; else echo 'NO'; fi)
           echo "::set-output name=pythonVersions::$PYTHON_VERSIONS"
           echo "::set-output name=db::$DB"
           echo "::set-output name=search::$SEARCH"
@@ -33,8 +33,10 @@ jobs:
       matrix:
         python-version: "${{fromJson(needs.create-strategy.outputs.python-versions)}}"
         requirements-level: [pypi]
-        db-service: "${{fromJson(needs.create-strategy.outputs.db-services)}}"
-        # search-service: "${{fromJson(needs.create-strategy.outputs.search-services)}}"
+        if: needs.create-strategy.outputs.db == "YES"
+        db-service: ["postgresql13", "mysql8"]
+        if: needs.create-strategy.outputs.search == "YES"
+        search-service: ["elasticsearch7"]
 
     steps:
       - name: Checkout
