@@ -9,15 +9,19 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: python-versions
-        id: python-versions
+      - name: requirements
+        id: requirements
         run: |
-          KK=$(grep "Programming Language :: Python ::" setup.cfg | sed -E "s/^.*::\s(.*)$/\1/" | tr "\n" " " | xargs | sed -E -e 's/\s/","/g' -e 's/^/["/' -e 's/$/"]/')
-          echo "::set-output name=pythonVersions::$KK"
+          PYTHON_VERSIONS=$(grep "Programming Language :: Python ::" setup.cfg | sed -E "s/^.*::\s(.*)$/\1/" | tr "\n" " " | xargs | sed -E -e 's/\s/","/g' -e 's/^/["/' -e 's/$/"]/')
+          DB=$(if grep -q "invenio-db" setup.cfg; then echo '["postgresql13", "mysql8"]'; else echo '[]'; fi)
+          SEARCH=$(if grep -q "invenio-search" setup.cfg; then echo '["elasticsearch7"]'; else echo '[]'; fi)
+          echo "::set-output name=pythonVersions::$PYTHON_VERSIONS"
+          echo "::set-output name=db::$DB"
+          echo "::set-output name=search::$SEARCH"
     outputs:
-      python-versions: "${{steps.python-versions.outputs.pythonVersions}}"
-      db-services: "['postgresql13']"
-      search-services: "['elasticsearch7']"
+      python-versions: "${{steps.requirements.outputs.pythonVersions}}"
+      db-services: "${{steps.requirements.outputs.db}}"
+      search-services: "${{steps.requirements.outputs.search}}"
 
   tests:
     needs: create-strategy
