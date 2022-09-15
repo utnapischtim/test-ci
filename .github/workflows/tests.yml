@@ -1,0 +1,142 @@
+on:
+  workflow_call:
+
+jobs:
+  create-strategy:
+    runs-on: ubuntu-latest
+    name: "create strategy"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: python-versions
+        id: python-versions
+        run: echo "::set-output name=python-versions::$(grep 'Programming Language :: Python ::' setup.cfg | sed -E 's/^.*::\s(.*)$/\1/' | tr '\n' ' ' | xargs | sed -E -e 's/\s/" "/g' -e 's/^/[\"/' -e 's/$/\"]/')"
+    outputs:
+      python-versions: "${{steps.python-versions.outputs.python-versions}}"
+      db-services: "[]"
+      search-services: "[]"
+
+  tests:
+    needs: create-strategy
+    runs-on: ubuntu-latest
+    name: Test (Python ${{matrix.python-versions}}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: "${{needs.create-strategy.outputs.python-versions}}"
+        requirements-level: [pypi]
+        db-service: "${{needs.create-strategy.outputs.db-services}}"
+        search-service: "${{needs.create-strategy.outputs.search-services}}"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Generate dependencies
+        run: |
+          pip install wheel requirements-builder
+          requirements-builder -e "$EXTRAS" --level=${{ matrix.requirements-level }} setup.py > .${{ matrix.requirements-level }}-${{ matrix.python-version }}-requirements.txt
+          cat .${{ matrix.requirements-level }}-${{ matrix.python-version }}-requirements.txt
+
+      - name: Cache pip
+        uses: actions/cache@v2
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('.${{ matrix.requirements-level }}-${{ matrix.python-version }}-requirements.txt') }}
+
+      - name: Log pip before install
+        run: |
+          pip --version
+          pip list
+
+      - name: Install dependencies
+        run: |
+          pip install -r .${{ matrix.requirements-level }}-${{ matrix.python-version }}-requirements.txt
+          pip install ".[$EXTRAS]"
+          pip freeze
+          docker --version
+          docker-compose --version
+
+      - name: Log pip after install
+        run: |
+          pip --version
+          pip list
+
+      - name: Run tests
+        run: |
+          ./run-tests.sh
+  
+  # Tests:
+  #   runs-on: ubuntu-20.04
+
+  #   strategy:
+  #     matrix:
+  #         python-version: [3.8, 3.9]
+  #         requirements-level: [pypi]
+  #         db-service: [postgresql12]
+  #         search-service: [elasticsearch7]
+  #         include:
+  #         - db-service: postgresql12
+  #           DB_EXTRAS: "postgresql"
+
+  #         - search-service: elasticsearch7
+  #           SEARCH_EXTRAS: "elasticsearch7"
+
+  #   timeout-minutes: 20
+
+  #   name: Test (Python ${{ matrix.python-version }})
+
+  #   env:
+  #     DB: ${{ matrix.db-service }}
+  #     SEARCH: ${{ matrix.search-service }}
+  #     EXTRAS: tests
+
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v2
+
+  #     - name: Set up Python ${{ matrix.python-version }}
+  #       uses: actions/setup-python@v2
+  #       with:
+  #         python-version: ${{ matrix.python-version }}
+
+  #     - name: Generate dependencies
+  #       run: |
+  #         pip install wheel requirements-builder
+  #         requirements-builder -e "$EXTRAS" --level=${{ matrix.requirements-level }} setup.py > .${{ matrix.requirements-level }}-${{ matrix.python-version }}-requirements.txt
+  #         cat .${{ matrix.requirements-level }}-${{ matrix.python-version }}-requirements.txt
+
+  #     - name: Cache pip
+  #       uses: actions/cache@v2
+  #       with:
+  #         path: ~/.cache/pip
+  #         key: ${{ runner.os }}-pip-${{ hashFiles('.${{ matrix.requirements-level }}-${{ matrix.python-version }}-requirements.txt') }}
+
+  #     - name: Log pip before install
+  #       run: |
+  #         pip --version
+  #         pip list
+
+  #     - name: Install dependencies
+  #       run: |
+  #         pip install -r .${{ matrix.requirements-level }}-${{ matrix.python-version }}-requirements.txt
+  #         pip install ".[$EXTRAS]"
+  #         pip freeze
+  #         docker --version
+  #         docker-compose --version
+
+  #     - name: Log pip after install
+  #       run: |
+  #         pip --version
+  #         pip list
+
+  #     - name: Run tests
+  #       run: |
+  #         ./run-tests.sh
