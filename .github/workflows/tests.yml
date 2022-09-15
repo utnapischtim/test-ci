@@ -7,11 +7,14 @@ jobs:
 
   tests:
     needs: create-strategy
-    uses: utnapischtim/test-ci/.github/workflows/steps.yml@main
     runs-on: ubuntu-latest
-    name: Test (Python ${{matrix.python-versions}}
+    name: Test (Python ${{matrix.python-version}}
     strategy:
       fail-fast: false
       matrix:
         python-version: "${{fromJson(needs.create-strategy.outputs.python-versions)}}"
         requirements-level: [pypi]
+    #uses: utnapischtim/test-ci/.github/workflows/steps.yml@main
+    steps:
+      - name: Generate dependencies
+        run: echo ${{matrix.python-version}}
