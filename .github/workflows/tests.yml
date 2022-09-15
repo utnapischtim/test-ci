@@ -3,6 +3,8 @@ on:
 
 jobs:
   create-strategy:
+    runs-on: ubuntu-latest
+
     outputs:
       matrix: ${{ steps.requirements.outputs.matrix }}
 
