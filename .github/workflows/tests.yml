@@ -20,7 +20,7 @@ jobs:
           SEARCH=$(if grep -q "invenio-search" setup.cfg; then echo 'YES'; else echo 'NO'; fi)
 
           matrix=$(
-            echo '{ "python-version": $PYTHON_VERSIONS, "requirements-level": ["pypi"] }'
+            echo "{ \"python-version\": $PYTHON_VERSIONS, \"requirements-level\": [\"pypi\"] }"
           )
           echo $matrix
           echo "::set-output name=matrix::$matrix"
