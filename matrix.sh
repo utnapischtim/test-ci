@@ -30,6 +30,6 @@ SEARCH=$(
     echo ''
   fi)
 matrix=$(
-  echo "{ \"requirements-level\": [\"pypi\"], \"python-version\": $PYTHON_VERSIONS, $DB $SEARCH $INCLUDE }"
+  echo "{ \"requirements-level\": [\"pypi\"], \"python-version\": $PYTHON_VERSIONS, $DB $SEARCH $INCLUDE }" | jq -c .
       )
-echo $matrix
+echo "$matrix"
