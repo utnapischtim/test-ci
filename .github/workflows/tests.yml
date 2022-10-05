@@ -15,7 +15,7 @@ jobs:
       - name: requirements
         id: requirements
         run: |
-          matrix=$(./matrix.sh)
+          matrix=$(./$GITHUB_ACTION_PATH/matrix.sh)
           echo "--------------------"
           echo $matrix
           echo "--------------------"
