@@ -15,7 +15,7 @@ jobs:
       - name: requirements
         id: requirements
         run: |
-          matrix=$(matrix.sh)
+          matrix=$(./matrix.sh)
           echo "--------------------"
           echo $matrix
           echo "--------------------"
@@ -24,7 +24,7 @@ jobs:
   tests:
     needs: create-strategy
     runs-on: ubuntu-latest
-    name: Test (Python ${{matrix.python-version}}
+    name: Test (Python ${{matrix.python-version}})
     strategy:
       fail-fast: false
       matrix: ${{ fromJson(needs.create-strategy.outputs.matrix) }}
