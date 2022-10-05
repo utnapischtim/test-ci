@@ -15,16 +15,7 @@ jobs:
       - name: requirements
         id: requirements
         run: |
-          INCLUDE='"include": [{
-            "db-service": "postgresql14",
-            "DB_EXTRAS": "postgresql"
-          }, {
-            "db-service": "mysql8",
-            "DB_EXTRAS": "mysql"
-          }, {
-            "search-service": "opensearch2",
-            "SEARCH_EXTRAS": "opensearch2"
-          }],'
+          INCLUDE=''
           PYTHON_VERSIONS=$(
             grep "Programming Language :: Python ::" setup.cfg |
               sed -E "s/^.*::\s(.*)$/\1/" |
