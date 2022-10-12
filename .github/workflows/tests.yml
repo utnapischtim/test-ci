@@ -64,7 +64,7 @@ jobs:
     env:
       DB: ${{ matrix.db-service }}
       SEARCH: ${{ matrix.search-service }}
-      EXTRAS: tests
+      CACHE: ${{ matrix.cache-service }}
 
     steps:
       - name: Checkout
