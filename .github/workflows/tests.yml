@@ -51,7 +51,7 @@ jobs:
           echo "--------------------"
           echo $matrix
           echo "--------------------"
-          echo "::set-output name=matrix::$matrix"
+          echo "matrix=$matrix" >> $GITHUB_ENV
 
   tests:
     needs: create-strategy
@@ -59,7 +59,7 @@ jobs:
     name: Test (Python ${{matrix.python-version}})
     strategy:
       fail-fast: false
-      matrix: ${{ fromJson(needs.create-strategy.outputs.matrix) }}
+      matrix: ${{ fromJson(env.matrix) }}
 
     env:
       DB: ${{ matrix.db-service }}
