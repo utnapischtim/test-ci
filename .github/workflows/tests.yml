@@ -61,6 +61,11 @@ jobs:
       fail-fast: false
       matrix: ${{ fromJson(needs.create-strategy.outputs.matrix) }}
 
+    env:
+      DB: ${{ matrix.db-service }}
+      SEARCH: ${{ matrix.search-service }}
+      EXTRAS: tests
+
     steps:
       - name: Checkout
         uses: actions/checkout@v2
