@@ -15,9 +15,9 @@ jobs:
       - name: Extract Variables
         id: vars
         run: |
-          tag_name=${GITHUB_REF#refs/*/}
-          package_name=${GITHUB_REPOSITORY#*/}
-          message_text=${{ github.event.head_commit.message }}
+          tag_name="${GITHUB_REF#refs/*/}"
+          package_name="${GITHUB_REPOSITORY#*/}"
+          message_text="${{ github.event.head_commit.message }}"
           vars=$(
             echo "{ \"tag_name\": \"$tag_name\", \"package_name\": \"$package_name\", \"message_text\": \"$message_text\" }"
           )
