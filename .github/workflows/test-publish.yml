@@ -18,8 +18,11 @@ jobs:
           tag_name="${GITHUB_REF#refs/*/}"
           package_name="${GITHUB_REPOSITORY#*/}"
           message_text="${{ github.event.head_commit.message }}"
+          tag_name_pattern: ^v[0-9]+\.[0-9]+\.[0-9]+$
+          commit_message_pattern: ^Release[[:space:]]v[0-9]+\.[0-9]+\.[0-9]+$
+          package_version_pattern: "Release $tag_name"
           vars=$(
-            echo "{ \"tag_name\": \"$tag_name\", \"package_name\": \"$package_name\", \"message_text\": \"$message_text\" }"
+            echo "{ \"tag_name\": \"$tag_name\", \"package_name\": \"$package_name\", \"message_text\": \"$message_text\", "patterns": { \"tag_name\": \"$tag_name_pattern\", \"commit_message\": \"$commit_message_pattern\", \"package_version\": \"$package_version_pattern\"} }"
           )
           echo "----------------------"
           echo $vars
@@ -33,9 +36,6 @@ jobs:
 
     env:
       vars: ${{ fromJson(needs.calculate-vars.outputs.vars) }}
-      TAG_NAME_PATTERN: ^v[0-9]+\.[0-9]+\.[0-9]+$
-      COMMIT_MESSAGE_PATTERN: ^Release[[:space:]]v[0-9]+\.[0-9]+\.[0-9]+$
-      PACKAGE_VERSION_PATTERN: "Release ${{ fromJson(needs.calculate-vars.outputs.vars).tag_name }}"
 
     steps:
       - name: Checkout
@@ -47,23 +47,23 @@ jobs:
 
       - name: Check Tag Name
         run: |
-          if [[ ! ${{ env.vars.tag_name }} =~ ${{ env.TAG_NAME_PATTERN }} ]]
+          if [[ ! ${{ env.vars.tag_name }} =~ ${{ env.patterns.tag_name }} ]]
           then
-            echo "Tag does not follow following convention ${{ env.TAG_NAME_PATTERN }}!!!"
+            echo "Tag does not follow following convention ${{ env.patterns.tag_name }}!!!"
             exit 1
           fi
 
       - name: Check Commit Message
         run: |
-          if [[ ! ${{ env.vars.message_text }} =~ ${{ env.COMMIT_MESSAGE_PATTERN }} ]]
+          if [[ ! ${{ env.vars.message_text }} =~ ${{ env.patterns.commit_message }} ]]
           then
-            echo "Publish failed: Commit message not conform (Release v[0-9]+\.[0-9]+\.[0-9]+)!!!"
+            echo "Publish failed: Commit message not conform (${{ env.patterns.commit_message }})!!!"
             exit 1
           fi
 
       - name: Check Commit Version
         run: |
-          if [[ ! "${{ env.vars.message_text }}" == "${{ env.PACKAGE_VERSION_PATTERN }}" ]]
+          if [[ ! "${{ env.vars.message_text }}" == "${{ env.patterns.package_version }}" ]]
           then
               echo "Publish failed: Commit version not match!!!"
               echo "Tag: ${{ env.vars.tag_name }} Message: ${{ env.vars.message_text }}"
