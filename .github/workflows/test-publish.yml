@@ -49,9 +49,11 @@ jobs:
           vars=${{ fromJson(needs.calculate-vars.outputs.vars) }}
           echo "vars $vars"
 
-          tag_name=$(jq ".tag_name" <(echo "${{ needs.calculate-vars.outputs.vars }}"))
+          # tag_name=$(jq ".tag_name" <(echo "${{ needs.calculate-vars.outputs.vars }}"))
+          # echo "tag_name $tag_name"
+          tag_name=$(echo "${{ needs.calculate-vars.outputs.vars }}" | jq ".tag_name")
           echo "tag_name $tag_name"
-          if [[ ! $vars.tag_name }} =~ ${{ vars.patterns.tag_name }} ]]
+          if [[ ! $vars.tag_name =~ $vars.patterns.tag_name ]]
           then
             echo "Tag does not follow following convention ${{ env.patterns.tag_name }}!!!"
             exit 1
