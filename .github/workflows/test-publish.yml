@@ -42,7 +42,7 @@ jobs:
 
       - name: Extract Package version
         id: extract_version
-        uses: russoedu/extract-package-version@patch-1
+        uses: Saionaro/extract-package-version@v1.1.1
 
       - name: Check Tag Name
         run: |
