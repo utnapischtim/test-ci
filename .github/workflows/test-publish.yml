@@ -21,8 +21,8 @@ jobs:
           message_text=$(echo "${{ github.event.head_commit.message }}" | tr -d '\n')
           # [.] instead of \. to get rid of json parsing problems of regex
           tag_name_pattern="^v[0-9]+[.][0-9]+[.][0-9]+$"
-          commit_message_pattern="^Release[[:space:]]v[0-9]+[.][0-9]+[.][0-9]+$"
-          package_version_pattern="Release $tag_name"
+          commit_message_pattern="^release[[:space:]]v[0-9]+[.][0-9]+[.][0-9]+$"
+          package_version_pattern="release $tag_name"
           vars=$(
             echo "{ \"tag_name\": \"$tag_name\", \"package_name\": \"$package_name\", \"message_text\": \"$message_text\", \"patterns\": { \"tag_name\": \"$tag_name_pattern\", \"commit_message\": \"$commit_message_pattern\", \"package_version\": \"$package_version_pattern\"} }"
           )
@@ -46,7 +46,7 @@ jobs:
 
       - name: Check Tag Name
         run: |
-          tag_name=${{ fromJson(needs.calculate-vars.outputs.vars).tag_name }}
+          tag_name="${{ fromJson(needs.calculate-vars.outputs.vars).tag_name }}"
           tag_name_pattern=${{ fromJson(needs.calculate-vars.outputs.vars).patterns.tag_name }}
 
           if [[ ! $tag_name =~ $tag_name_pattern ]]
@@ -57,7 +57,7 @@ jobs:
 
       - name: Check Commit Message
         run: |
-          message_text=${{ fromJson(needs.calculate-vars.outputs.vars).message_text }}
+          message_text="${{ fromJson(needs.calculate-vars.outputs.vars).message_text }}"
           commit_message_pattern=${{ fromJson(needs.calculate-vars.outputs.vars).patterns.commit_message }}
           if [[ ! $message_text =~ $commit_message_pattern ]]
           then
@@ -67,10 +67,10 @@ jobs:
 
       - name: Check Commit Version
         run: |
-          tag_name=${{ fromJson(needs.calculate-vars.outputs.vars).tag_name }}
-          message_text=${{ fromJson(needs.calculate-vars.outputs.vars).message_text }}
-          package_version_pattern=${{ fromJson(needs.calculate-vars.outputs.vars).patterns.package_version }}
-          if [[ ! "$message_text" == "$package_version_pattern" ]]
+          tag_name="${{ fromJson(needs.calculate-vars.outputs.vars).tag_name }}"
+          message_text="${{ fromJson(needs.calculate-vars.outputs.vars).message_text }}"
+          package_version_pattern="${{ fromJson(needs.calculate-vars.outputs.vars).patterns.package_version }}"
+          if [[ ! $message_text == $package_version_pattern ]]
           then
               echo "Publish failed: Commit version not match!!!"
               echo "Tag: $tag_name, Message: $message_text"
@@ -80,11 +80,12 @@ jobs:
 
       - name: Check Package Version
         run: |
-          tag_name=${{ fromJson(needs.calculate-vars.outputs.vars).tag_name }}
-          message_text=${{ fromJson(needs.calculate-vars.outputs.vars).message_text }}
-          if [[ ! "v${{ steps.extract_version.outputs.version }}" == "$tag_name" ]]
+          tag_name="${{ fromJson(needs.calculate-vars.outputs.vars).tag_name }}"
+          message_text="${{ fromJson(needs.calculate-vars.outputs.vars).message_text }}"
+          version="v${{ steps.extract_version.outputs.version }}"
+          if [[ ! $version == $tag_name ]]
           then
               echo "Publish failed: Package version not match!!!"
-              echo "Package version: ${{ steps.extract_version.outputs.version }} Tag version: $message_text"
+              echo "Package version: $version Tag version: $message_text"
               exit 1
           fi
