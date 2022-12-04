@@ -35,7 +35,7 @@ jobs:
       vars: ${{ fromJson(needs.calculate-vars.outputs.vars) }}
       TAG_NAME_PATTERN: ^v[0-9]+\.[0-9]+\.[0-9]+$
       COMMIT_MESSAGE_PATTERN: ^Release[[:space:]]v[0-9]+\.[0-9]+\.[0-9]+$
-      PACKAGE_VERSION_PATTERN: "Release ${{ env.vars.tag_name }}"
+      PACKAGE_VERSION_PATTERN: "Release ${{ fromJson(needs.calculate-vars.outputs.vars).tag_name }}"
 
     steps:
       - name: Checkout
@@ -63,7 +63,7 @@ jobs:
 
       - name: Check Commit Version
         run: |
-          if [[ ! "${{ env.vars.message_text }}" == "${{ env.PACKAGE_VERION_PATTERN }}" ]]
+          if [[ ! "${{ env.vars.message_text }}" == "${{ env.PACKAGE_VERSION_PATTERN }}" ]]
           then
               echo "Publish failed: Commit version not match!!!"
               echo "Tag: ${{ env.vars.tag_name }} Message: ${{ env.vars.message_text }}"
