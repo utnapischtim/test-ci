@@ -17,7 +17,7 @@ jobs:
         run: |
           tag_name="${GITHUB_REF#refs/*/}"
           package_name="${GITHUB_REPOSITORY#*/}"
-          message_text="$(echo ${{ github.event.head_commit.message }} | tr '\n' '')"
+          message_text=$(echo "${{ github.event.head_commit.message }}" | tr '\n' '')
           tag_name_pattern="^v[0-9]+\.[0-9]+\.[0-9]+$"
           commit_message_pattern="^Release[[:space:]]v[0-9]+\.[0-9]+\.[0-9]+$"
           package_version_pattern="Release $tag_name"
