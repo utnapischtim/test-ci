@@ -47,7 +47,7 @@ jobs:
       - name: Check Tag Name
         run: |
           vars=${{ fromJson(needs.calculate-vars.outputs.vars) }}
-          echo "vars $vars"
+          echo "vars $vars.tag_name"
 
           # tag_name=$(jq ".tag_name" <(echo "${{ needs.calculate-vars.outputs.vars }}"))
           # echo "tag_name $tag_name"
