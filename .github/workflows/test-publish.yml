@@ -36,9 +36,6 @@ jobs:
     runs-on: ubuntu-latest
     name: Check about the prerequisites
 
-    env:
-      vars: ${{ fromJson(needs.calculate-vars.outputs.vars) }}
-
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -49,7 +46,8 @@ jobs:
 
       - name: Check Tag Name
         run: |
-          if [[ ! ${{ env.vars.tag_name }} =~ ${{ env.patterns.tag_name }} ]]
+          vars=${{ fromJson(needs.calculate-vars.outputs.vars) }}
+          if [[ ! ${{ vars.tag_name }} =~ ${{ vars.patterns.tag_name }} ]]
           then
             echo "Tag does not follow following convention ${{ env.patterns.tag_name }}!!!"
             exit 1
