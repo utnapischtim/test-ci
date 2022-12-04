@@ -48,41 +48,43 @@ jobs:
         run: |
           tag_name=${{ fromJson(needs.calculate-vars.outputs.vars).tag_name }}
           tag_name_pattern=${{ fromJson(needs.calculate-vars.outputs.vars).patterns.tag_name }}
-          echo "tag_name: $tag_name, tag_name_pattern: $tag_name_pattern"
 
-          # tag_name=$(jq ".tag_name" <(echo "${{ needs.calculate-vars.outputs.vars }}"))
-          # echo "tag_name $tag_name"
-          # tag_name=$(echo "${{ needs.calculate-vars.outputs.vars }}" | jq ".tag_name")
-          # echo "tag_name $tag_name"
           if [[ ! $tag_name =~ $tag_name_pattern ]]
           then
-            echo "Tag does not follow following convention ${{ vars.patterns.tag_name }}!!!"
+            echo "Tag does not follow following convention $tag_name_pattern!!!"
             exit 1
           fi
 
       - name: Check Commit Message
         run: |
-          if [[ ! ${{ env.vars.message_text }} =~ ${{ env.patterns.commit_message }} ]]
+          message_text=${{ fromJson(needs.calculate-vars.outputs.vars).message_text }}
+          commit_message_pattern=${{ fromJson(needs.calculate-vars.outputs.vars).patterns.commit_message }}
+          if [[ ! $message_text =~ $commit_message_pattern ]]
           then
-            echo "Publish failed: Commit message not conform (${{ env.patterns.commit_message }})!!!"
+            echo "Publish failed: Commit message not conform ($commit_message_pattern)!!!"
             exit 1
           fi
 
       - name: Check Commit Version
         run: |
-          if [[ ! "${{ env.vars.message_text }}" == "${{ env.patterns.package_version }}" ]]
+          tag_name=${{ fromJson(needs.calculate-vars.outputs.vars).tag_name }}
+          message_text=${{ fromJson(needs.calculate-vars.outputs.vars).message_text }}
+          package_version_pattern=${{ fromJson(needs.calculate-vars.outputs.vars).patterns.package_version }}
+          if [[ ! "$message_text" == "$package_version_pattern" ]]
           then
               echo "Publish failed: Commit version not match!!!"
-              echo "Tag: ${{ env.vars.tag_name }} Message: ${{ env.vars.message_text }}"
+              echo "Tag: $tag_name, Message: $message_text"
               exit 1
 
           fi
 
       - name: Check Package Version
         run: |
-          if [[ ! "v${{ steps.extract_version.outputs.version }}" == "${{ env.vars.tag_name }}" ]]
+          tag_name=${{ fromJson(needs.calculate-vars.outputs.vars).tag_name }}
+          message_text=${{ fromJson(needs.calculate-vars.outputs.vars).message_text }}
+          if [[ ! "v${{ steps.extract_version.outputs.version }}" == "$tag_name" ]]
           then
               echo "Publish failed: Package version not match!!!"
-              echo "Package version: ${{ steps.extract_version.outputs.version }} Tag version: ${{ env.vars.tag_text }}"
+              echo "Package version: ${{ steps.extract_version.outputs.version }} Tag version: $message_text"
               exit 1
           fi
